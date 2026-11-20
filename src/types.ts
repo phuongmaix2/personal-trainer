@@ -41,3 +41,5 @@ export type Training = {
   activity: string
   customer: TrainingCustomer
 }
+
+export type CustomerInput = Omit<Customer, '_links'>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
 import TextField from '@mui/material/TextField'
@@ -6,6 +6,9 @@ import Typography from '@mui/material/Typography'
 import { DataGrid, type GridColDef } from '@mui/x-data-grid'
 import { getCustomers } from '../api/customerApi'
 import type { Customer } from '../types'
+import Stack from '@mui/material/Stack'
+import AddCustomerDialog from '../components/AddCustomerDialog'
+
 
 const columns: GridColDef[] = [
     { field: 'firstname', headerName: 'First name', flex: 1 },
@@ -23,9 +26,12 @@ function CustomersPage() {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
 
-    useEffect(() => {
-        getCustomers()
-            .then((data) => setCustomers(data))
+    const fetchCustomers = useCallback(() => {
+        return getCustomers()
+            .then((data) => {
+                setCustomers(data)
+                setError('')
+            })
             .catch((error: unknown) => {
                 const message =
                     error instanceof Error
@@ -34,8 +40,14 @@ function CustomersPage() {
 
                 setError(message)
             })
-            .finally(() => setLoading(false))
+            .finally(() => {
+                setLoading(false)
+            })
     }, [])
+
+    useEffect(() => {
+        void fetchCustomers()
+    }, [fetchCustomers])
 
     const filteredCustomers = customers.filter((customer) => {
         const searchText = search.toLowerCase()
@@ -53,9 +65,20 @@ function CustomersPage() {
 
     return (
         <Box>
-            <Typography variant="h4" component="h1" gutterBottom>
-                Customers
-            </Typography>
+            <Stack
+                direction="row"
+                sx={{
+                    mb: 2,
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                }}
+            >
+                <Typography variant="h4" component="h1">
+                    Customers
+                </Typography>
+
+                <AddCustomerDialog onCustomerAdded={fetchCustomers} />
+            </Stack>
 
             <TextField
                 label="Search customers"
