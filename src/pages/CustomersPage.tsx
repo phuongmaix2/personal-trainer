@@ -8,17 +8,8 @@ import { getCustomers } from '../api/customerApi'
 import type { Customer } from '../types'
 import Stack from '@mui/material/Stack'
 import AddCustomerDialog from '../components/AddCustomerDialog'
-
-
-const columns: GridColDef[] = [
-    { field: 'firstname', headerName: 'First name', flex: 1 },
-    { field: 'lastname', headerName: 'Last name', flex: 1 },
-    { field: 'streetaddress', headerName: 'Street address', flex: 1.5 },
-    { field: 'postcode', headerName: 'Postcode', width: 110 },
-    { field: 'city', headerName: 'City', flex: 1 },
-    { field: 'email', headerName: 'Email', flex: 1.5 },
-    { field: 'phone', headerName: 'Phone', flex: 1 },
-]
+import EditCustomerDialog from '../components/EditCustomerDialog'
+import DeleteCustomerDialog from '../components/DeleteCustomerDialog'
 
 function CustomersPage() {
     const [customers, setCustomers] = useState<Customer[]>([])
@@ -48,6 +39,40 @@ function CustomersPage() {
     useEffect(() => {
         void fetchCustomers()
     }, [fetchCustomers])
+
+    const columns: GridColDef<Customer>[] = [
+        { field: 'firstname', headerName: 'First name', flex: 1 },
+        { field: 'lastname', headerName: 'Last name', flex: 1 },
+        {
+            field: 'streetaddress',
+            headerName: 'Street address',
+            flex: 1.5,
+        },
+        { field: 'postcode', headerName: 'Postcode', width: 110 },
+        { field: 'city', headerName: 'City', flex: 1 },
+        { field: 'email', headerName: 'Email', flex: 1.5 },
+        { field: 'phone', headerName: 'Phone', flex: 1 },
+        {
+            field: 'actions',
+            headerName: 'Actions',
+            width: 120,
+            sortable: false,
+            filterable: false,
+            renderCell: (params) => (
+                <>
+                    <EditCustomerDialog
+                        customer={params.row}
+                        onCustomerUpdated={fetchCustomers}
+                    />
+
+                    <DeleteCustomerDialog
+                        customer={params.row}
+                        onCustomerDeleted={fetchCustomers}
+                    />
+                </>
+            ),
+        },
+    ]
 
     const filteredCustomers = customers.filter((customer) => {
         const searchText = search.toLowerCase()
