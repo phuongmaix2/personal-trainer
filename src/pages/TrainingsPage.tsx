@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import dayjs from 'dayjs'
 import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
@@ -7,38 +7,13 @@ import Typography from '@mui/material/Typography'
 import { DataGrid, type GridColDef } from '@mui/x-data-grid'
 import { getTrainings } from '../api/trainingApi'
 import type { Training } from '../types'
+import DeleteTrainingDialog from '../components/DeleteTrainingDialog'
 
 type TrainingRow = Training & {
     customerName: string
     formattedDate: string
 }
 
-const columns: GridColDef[] = [
-    {
-        field: 'date',
-        headerName: 'Date',
-        flex: 1,
-        minWidth: 170,
-        renderCell: (params) =>
-            dayjs(params.row.date).format('DD.MM.YYYY HH:mm'),
-    },
-    {
-        field: 'activity',
-        headerName: 'Activity',
-        flex: 1,
-    },
-    {
-        field: 'duration',
-        headerName: 'Duration (min)',
-        width: 140,
-    },
-    {
-        field: 'customerName',
-        headerName: 'Customer',
-        flex: 1,
-        minWidth: 170,
-    },
-]
 
 function TrainingsPage() {
     const [trainings, setTrainings] = useState<Training[]>([])
@@ -46,9 +21,12 @@ function TrainingsPage() {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
 
-    useEffect(() => {
-        getTrainings()
-            .then((data) => setTrainings(data))
+    const fetchTrainings = useCallback(() => {
+        return getTrainings()
+            .then((data) => {
+                setTrainings(data)
+                setError('')
+            })
             .catch((error: unknown) => {
                 const message =
                     error instanceof Error
@@ -57,8 +35,54 @@ function TrainingsPage() {
 
                 setError(message)
             })
-            .finally(() => setLoading(false))
+            .finally(() => {
+                setLoading(false)
+            })
     }, [])
+
+    useEffect(() => {
+        void fetchTrainings()
+    }, [fetchTrainings])
+
+    const columns: GridColDef<TrainingRow>[] = [
+        {
+            field: 'date',
+            headerName: 'Date',
+            flex: 1,
+            minWidth: 170,
+            renderCell: (params) =>
+                dayjs(params.row.date).format('DD.MM.YYYY HH:mm'),
+        },
+        {
+            field: 'activity',
+            headerName: 'Activity',
+            flex: 1,
+        },
+        {
+            field: 'duration',
+            headerName: 'Duration (min)',
+            width: 140,
+        },
+        {
+            field: 'customerName',
+            headerName: 'Customer',
+            flex: 1,
+            minWidth: 170,
+        },
+        {
+            field: 'actions',
+            headerName: 'Actions',
+            width: 100,
+            sortable: false,
+            filterable: false,
+            renderCell: (params) => (
+                <DeleteTrainingDialog
+                    training={params.row}
+                    onTrainingDeleted={fetchTrainings}
+                />
+            ),
+        },
+    ]
 
     const rows: TrainingRow[] = trainings.map((training) => ({
         ...training,

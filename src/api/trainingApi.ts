@@ -29,3 +29,16 @@ export async function addTraining(training: TrainingInput) {
         throw new Error('Failed to add training')
     }
 }
+
+export async function deleteTraining(id: number) {
+    const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/trainings/${id}`,
+        {
+            method: 'DELETE',
+        },
+    )
+
+    if (!response.ok) {
+        throw new Error('Failed to delete training')
+    }
+}
