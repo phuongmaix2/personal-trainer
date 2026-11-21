@@ -43,3 +43,10 @@ export type Training = {
 }
 
 export type CustomerInput = Omit<Customer, '_links'>
+
+export type TrainingInput = {
+  date: string
+  activity: string
+  duration: number
+  customer: string
+}

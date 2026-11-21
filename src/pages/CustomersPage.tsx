@@ -10,6 +10,7 @@ import Stack from '@mui/material/Stack'
 import AddCustomerDialog from '../components/AddCustomerDialog'
 import EditCustomerDialog from '../components/EditCustomerDialog'
 import DeleteCustomerDialog from '../components/DeleteCustomerDialog'
+import AddTrainingDialog from '../components/AddTrainingDialog'
 
 function CustomersPage() {
     const [customers, setCustomers] = useState<Customer[]>([])
@@ -55,11 +56,13 @@ function CustomersPage() {
         {
             field: 'actions',
             headerName: 'Actions',
-            width: 120,
+            width: 150,
             sortable: false,
             filterable: false,
             renderCell: (params) => (
                 <>
+                    <AddTrainingDialog customer={params.row} />
+
                     <EditCustomerDialog
                         customer={params.row}
                         onCustomerUpdated={fetchCustomers}
