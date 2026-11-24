@@ -1,4 +1,5 @@
 import type {
+    Customer,
     CustomerInput,
     CustomerResponse,
 } from '../types'
@@ -30,6 +31,9 @@ export async function addCustomer(customer: CustomerInput) {
     if (!response.ok) {
         throw new Error('Failed to add customer')
     }
+
+    const data: Customer = await response.json()
+    return data
 }
 
 export async function updateCustomer(

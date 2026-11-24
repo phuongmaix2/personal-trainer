@@ -11,6 +11,11 @@ import Tooltip from '@mui/material/Tooltip'
 import TextField from '@mui/material/TextField'
 import { updateCustomer } from '../api/customerApi'
 import type { Customer, CustomerInput } from '../types'
+import {
+    digitsOnly,
+    isValidEmail,
+    isValidPhone,
+} from '../utils/customerValidation'
 
 type EditCustomerDialogProps = {
     customer: Customer
@@ -39,7 +44,7 @@ function getCustomerInput(customer: Customer): CustomerInput {
         postcode: customer.postcode,
         city: customer.city,
         email: customer.email,
-        phone: customer.phone,
+        phone: digitsOnly(customer.phone),
     }
 }
 
@@ -53,9 +58,14 @@ function EditCustomerDialog({
     const [saving, setSaving] = useState(false)
     const [error, setError] = useState('')
 
-    const isValid = Object.values(editedCustomer).every(
-        (value) => value.trim() !== '',
-    )
+    const emailIsValid = isValidEmail(editedCustomer.email)
+    const phoneIsValid = isValidPhone(editedCustomer.phone)
+    const isValid =
+        Object.values(editedCustomer).every(
+            (value) => value.trim() !== '',
+        ) &&
+        emailIsValid &&
+        phoneIsValid
 
     const handleOpen = () => {
         setEditedCustomer(getCustomerInput(customer))
@@ -125,16 +135,50 @@ function EditCustomerDialog({
                             label={field.label}
                             type={field.type ?? 'text'}
                             value={editedCustomer[field.name]}
-                            onChange={(event) =>
+                            onChange={(event) => {
+                                const value =
+                                    field.name === 'phone'
+                                        ? digitsOnly(event.target.value)
+                                        : event.target.value
+
                                 setEditedCustomer({
                                     ...editedCustomer,
-                                    [field.name]: event.target.value,
+                                    [field.name]: value,
                                 })
+                            }}
+                            error={
+                                (field.name === 'email' &&
+                                    editedCustomer.email !== '' &&
+                                    !emailIsValid) ||
+                                (field.name === 'phone' &&
+                                    editedCustomer.phone !== '' &&
+                                    !phoneIsValid)
+                            }
+                            helperText={
+                                field.name === 'email' &&
+                                editedCustomer.email !== '' &&
+                                !emailIsValid
+                                    ? 'Enter a valid email address'
+                                    : field.name === 'phone' &&
+                                        editedCustomer.phone !== '' &&
+                                        !phoneIsValid
+                                      ? 'Use 7–15 digits only'
+                                      : undefined
                             }
                             required
                             fullWidth
                             margin="dense"
                             autoFocus={index === 0}
+                            slotProps={{
+                                htmlInput: {
+                                    maxLength:
+                                        field.name === 'email' ? 100 : 60,
+                                    inputMode:
+                                        field.name === 'phone'
+                                            ? 'numeric'
+                                            : undefined,
+                                },
+                            }}
                         />
                     ))}
                 </DialogContent>
