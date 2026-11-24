@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
+import Paper from '@mui/material/Paper'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import { DataGrid, type GridColDef } from '@mui/x-data-grid'
@@ -96,44 +97,66 @@ function CustomersPage() {
 
     return (
         <Box>
-            <Stack
-                direction="row"
+            <Paper
                 sx={{
-                    mb: 2,
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
+                    p: { xs: 2.5, md: 3 },
+                    mb: 3,
+                    borderRadius: 4,
+                    border: '1px solid rgba(15, 118, 110, 0.12)',
+                    background:
+                        'linear-gradient(135deg, #ffffff 0%, #ecfeff 100%)',
+                    boxShadow: '0 16px 40px rgba(15, 23, 42, 0.07)',
                 }}
             >
-                <Typography variant="h4" component="h1">
-                    Customers
-                </Typography>
-
-                <Box
+                <Stack
+                    direction={{ xs: 'column', sm: 'row' }}
                     sx={{
-                        display: 'flex',
-                        gap: 1,
+                        gap: 2,
+                        justifyContent: 'space-between',
+                        alignItems: { xs: 'stretch', sm: 'center' },
                     }}
                 >
-                    <Button
-                        variant="outlined"
-                        startIcon={<DownloadIcon />}
-                        onClick={() => exportCustomersToCsv(customers)}
-                        disabled={loading || customers.length === 0}
-                    >
-                        Export CSV
-                    </Button>
+                    <Box>
+                        <Typography
+                            variant="overline"
+                            sx={{ color: '#0f766e', fontWeight: 800, letterSpacing: 1.4 }}
+                        >
+                            Client directory
+                        </Typography>
+                        <Typography variant="h4" component="h1">
+                            Customers
+                        </Typography>
+                        <Typography color="text.secondary" sx={{ mt: 0.5 }}>
+                            {customers.length} customers ready to train
+                        </Typography>
+                    </Box>
 
-                    <AddCustomerDialog onCustomerAdded={fetchCustomers} />
-                </Box>
-            </Stack>
+                    <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                        <Button
+                            variant="outlined"
+                            startIcon={<DownloadIcon />}
+                            onClick={() => exportCustomersToCsv(customers)}
+                            disabled={loading || customers.length === 0}
+                        >
+                            Export CSV
+                        </Button>
 
-            <TextField
-                label="Search customers"
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                size="small"
-                sx={{ mb: 2, width: 300 }}
-            />
+                        <AddCustomerDialog onCustomerAdded={fetchCustomers} />
+                    </Box>
+                </Stack>
+
+                <TextField
+                    label="Search customers"
+                    value={search}
+                    onChange={(event) => setSearch(event.target.value)}
+                    size="small"
+                    sx={{
+                        mt: 3,
+                        width: { xs: '100%', sm: 360 },
+                        backgroundColor: '#ffffff',
+                    }}
+                />
+            </Paper>
 
             {error && (
                 <Alert severity="error" sx={{ mb: 2 }}>
@@ -155,6 +178,21 @@ function CustomersPage() {
                                 pageSize: 10,
                                 page: 0,
                             },
+                        },
+                    }}
+                    sx={{
+                        backgroundColor: '#ffffff',
+                        borderColor: '#e2e8f0',
+                        borderRadius: 3,
+                        boxShadow: '0 8px 30px rgba(15, 23, 42, 0.08)',
+                        '& .MuiDataGrid-columnHeader': {
+                            backgroundColor: '#f8fafc',
+                        },
+                        '& .MuiDataGrid-columnHeaderTitle': {
+                            fontWeight: 700,
+                        },
+                        '& .MuiDataGrid-row:hover': {
+                            backgroundColor: '#f0fdfa',
                         },
                     }}
                 />

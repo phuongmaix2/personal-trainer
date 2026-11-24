@@ -74,13 +74,33 @@ function StatisticsPage() {
 
     return (
         <Box>
-            <Typography variant="h4" component="h1" gutterBottom>
-                Training Statistics
-            </Typography>
-
-            <Typography color="text.secondary" sx={{ mb: 2 }}>
-                Total training time: {totalMinutes} minutes
-            </Typography>
+            <Paper
+                sx={{
+                    p: { xs: 2.5, md: 3 },
+                    mb: 3,
+                    borderRadius: 4,
+                    color: '#ffffff',
+                    background:
+                        'linear-gradient(135deg, #0f172a 0%, #0f766e 100%)',
+                    boxShadow: '0 18px 45px rgba(15, 23, 42, 0.18)',
+                }}
+            >
+                <Typography
+                    variant="overline"
+                    sx={{ color: '#99f6e4', fontWeight: 800, letterSpacing: 1.4 }}
+                >
+                    Performance insights
+                </Typography>
+                <Typography variant="h4" component="h1">
+                    Training Statistics
+                </Typography>
+                <Typography sx={{ mt: 1, color: 'rgba(255, 255, 255, 0.76)' }}>
+                    Total training time
+                </Typography>
+                <Typography sx={{ mt: 0.25, fontSize: '2rem', fontWeight: 800 }}>
+                    {totalMinutes.toLocaleString()} minutes
+                </Typography>
+            </Paper>
 
             {error && (
                 <Alert severity="error" sx={{ mb: 2 }}>
@@ -108,6 +128,9 @@ function StatisticsPage() {
                     sx={{
                         p: 3,
                         height: Math.max(420, statistics.length * 50),
+                        borderColor: '#e2e8f0',
+                        borderRadius: 3,
+                        boxShadow: '0 8px 30px rgba(15, 23, 42, 0.08)',
                     }}
                 >
                     <ResponsiveContainer width="100%" height="100%">
@@ -140,7 +163,7 @@ function StatisticsPage() {
                             <Bar
                                 dataKey="minutes"
                                 name="Minutes"
-                                fill="#1976d2"
+                                fill="#0f766e"
                                 radius={[0, 6, 6, 0]}
                             />
                         </BarChart>

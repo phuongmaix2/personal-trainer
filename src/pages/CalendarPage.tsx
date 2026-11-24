@@ -7,13 +7,14 @@ import monarchThemePlugin from '@fullcalendar/react/themes/monarch'
 import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
 import CircularProgress from '@mui/material/CircularProgress'
+import Paper from '@mui/material/Paper'
 import Typography from '@mui/material/Typography'
 import { getTrainings } from '../api/trainingApi'
 import type { Training } from '../types'
 
 import '@fullcalendar/react/skeleton.css'
 import '@fullcalendar/react/themes/monarch/theme.css'
-import '@fullcalendar/react/themes/monarch/palettes/blue.css'
+import '@fullcalendar/react/themes/monarch/palettes/green.css'
 
 function CalendarPage() {
     const [trainings, setTrainings] = useState<Training[]>([])
@@ -50,13 +51,30 @@ function CalendarPage() {
 
     return (
         <Box>
-            <Typography
-                variant="h4"
-                component="h1"
-                sx={{ mb: 2 }}
+            <Paper
+                sx={{
+                    p: { xs: 2.5, md: 3 },
+                    mb: 3,
+                    borderRadius: 4,
+                    border: '1px solid rgba(15, 118, 110, 0.12)',
+                    background:
+                        'linear-gradient(135deg, #ffffff 0%, #ecfeff 100%)',
+                    boxShadow: '0 16px 40px rgba(15, 23, 42, 0.07)',
+                }}
             >
-                Training Calendar
-            </Typography>
+                <Typography
+                    variant="overline"
+                    sx={{ color: '#0f766e', fontWeight: 800, letterSpacing: 1.4 }}
+                >
+                    Schedule overview
+                </Typography>
+                <Typography variant="h4" component="h1">
+                    Training Calendar
+                </Typography>
+                <Typography color="text.secondary" sx={{ mt: 0.5 }}>
+                    Explore every session by month, week or day.
+                </Typography>
+            </Paper>
 
             {error && (
                 <Alert severity="error" sx={{ mb: 2 }}>
@@ -75,7 +93,20 @@ function CalendarPage() {
                     <CircularProgress />
                 </Box>
             ) : (
-                <FullCalendar
+                <Paper
+                    variant="outlined"
+                    sx={{
+                        p: {
+                            xs: 1,
+                            sm: 2,
+                        },
+                        borderColor: '#e2e8f0',
+                        borderRadius: 3,
+                        boxShadow: '0 8px 30px rgba(15, 23, 42, 0.08)',
+                        overflow: 'hidden',
+                    }}
+                >
+                    <FullCalendar
                     plugins={[
                         monarchThemePlugin,
                         dayGridPlugin,
@@ -106,14 +137,15 @@ function CalendarPage() {
                     nowIndicator
                     allDaySlot={false}
                     height="auto"
-                    slotMinTime="06:00:00"
-                    slotMaxTime="22:00:00"
-                    eventTimeFormat={{
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        hour12: false,
-                    }}
-                />
+                    slotMinTime="00:00:00"
+                    slotMaxTime="24:00:00"
+                        eventTimeFormat={{
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: false,
+                        }}
+                    />
+                </Paper>
             )}
         </Box>
     )
