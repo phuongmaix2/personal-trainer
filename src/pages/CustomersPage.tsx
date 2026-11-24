@@ -11,6 +11,9 @@ import AddCustomerDialog from '../components/AddCustomerDialog'
 import EditCustomerDialog from '../components/EditCustomerDialog'
 import DeleteCustomerDialog from '../components/DeleteCustomerDialog'
 import AddTrainingDialog from '../components/AddTrainingDialog'
+import DownloadIcon from '@mui/icons-material/Download'
+import Button from '@mui/material/Button'
+import { exportCustomersToCsv } from '../utils/exportCustomers'
 
 function CustomersPage() {
     const [customers, setCustomers] = useState<Customer[]>([])
@@ -105,7 +108,23 @@ function CustomersPage() {
                     Customers
                 </Typography>
 
-                <AddCustomerDialog onCustomerAdded={fetchCustomers} />
+                <Box
+                    sx={{
+                        display: 'flex',
+                        gap: 1,
+                    }}
+                >
+                    <Button
+                        variant="outlined"
+                        startIcon={<DownloadIcon />}
+                        onClick={() => exportCustomersToCsv(customers)}
+                        disabled={loading || customers.length === 0}
+                    >
+                        Export CSV
+                    </Button>
+
+                    <AddCustomerDialog onCustomerAdded={fetchCustomers} />
+                </Box>
             </Stack>
 
             <TextField
