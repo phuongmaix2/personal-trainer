@@ -71,11 +71,16 @@ function App() {
                     }}
                 >
                     <Box
+                        component={NavLink}
+                        to="/customers"
+                        aria-label="Go to customers home"
                         sx={{
                             flexGrow: 1,
                             display: 'flex',
                             alignItems: 'center',
                             gap: 1.5,
+                            color: 'inherit',
+                            textDecoration: 'none',
                         }}
                     >
                         <Box
