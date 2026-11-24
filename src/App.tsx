@@ -8,6 +8,7 @@ import { Navigate, NavLink, Route, Routes } from 'react-router-dom'
 import CustomersPage from './pages/CustomersPage'
 import TrainingsPage from './pages/TrainingsPage'
 import CalendarPage from './pages/CalendarPage'
+import StatisticsPage from './pages/StatisticsPage'
 
 function App() {
     return (
@@ -76,6 +77,23 @@ function App() {
                     >
                         Calendar
                     </Button>
+                    <Button
+                        component={NavLink}
+                        to="/statistics"
+                        sx={{
+                            color: '#ffffff',
+                            mx: 0.5,
+                            '&:hover': {
+                                backgroundColor: 'rgba(255, 255, 255, 0.25)',
+                            },
+                            '&.active': {
+                                backgroundColor: '#ffffff',
+                                color: '#1976d2',
+                            },
+                        }}
+                    >
+                        Statistics
+                    </Button>
                 </Toolbar>
             </AppBar>
 
@@ -88,6 +106,7 @@ function App() {
                     <Route path="/customers" element={<CustomersPage />} />
                     <Route path="/trainings" element={<TrainingsPage />} />
                     <Route path="/calendar" element={<CalendarPage />} />
+                    <Route path="/statistics" element={<StatisticsPage />} />
                 </Routes>
             </Container>
         </>
