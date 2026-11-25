@@ -14,6 +14,7 @@ import Tooltip from '@mui/material/Tooltip'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
+import { useNavigate } from 'react-router-dom'
 import { addTraining } from '../api/trainingApi'
 import type { Customer } from '../types'
 
@@ -24,6 +25,7 @@ type AddTrainingDialogProps = {
 function AddTrainingDialog({
     customer,
 }: AddTrainingDialogProps) {
+    const navigate = useNavigate()
     const [open, setOpen] = useState(false)
     const [date, setDate] = useState<Dayjs | null>(dayjs())
     const [activity, setActivity] = useState('')
@@ -59,7 +61,7 @@ function AddTrainingDialog({
         setError('')
 
         try {
-            await addTraining({
+            const trainingId = await addTraining({
                 date: date.toISOString(),
                 activity: activity.trim(),
                 duration: Number(duration),
@@ -67,6 +69,9 @@ function AddTrainingDialog({
             })
 
             setOpen(false)
+            navigate('/trainings', {
+                state: { highlightedTrainingId: trainingId },
+            })
         } catch (error: unknown) {
             const message =
                 error instanceof Error

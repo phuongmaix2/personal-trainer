@@ -4,7 +4,11 @@ import Box from '@mui/material/Box'
 import Paper from '@mui/material/Paper'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
-import { DataGrid, type GridColDef } from '@mui/x-data-grid'
+import {
+    DataGrid,
+    type GridColDef,
+    type GridPaginationModel,
+} from '@mui/x-data-grid'
 import { getCustomers } from '../api/customerApi'
 import type { Customer } from '../types'
 import Stack from '@mui/material/Stack'
@@ -21,12 +25,17 @@ function CustomersPage() {
     const [search, setSearch] = useState('')
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
+    const [highlightedCustomerId, setHighlightedCustomerId] =
+        useState<string | null>(null)
+    const [paginationModel, setPaginationModel] =
+        useState<GridPaginationModel>({ page: 0, pageSize: 10 })
 
     const fetchCustomers = useCallback(() => {
         return getCustomers()
             .then((data) => {
                 setCustomers(data)
                 setError('')
+                return data
             })
             .catch((error: unknown) => {
                 const message =
@@ -35,6 +44,7 @@ function CustomersPage() {
                         : 'Failed to fetch customers'
 
                 setError(message)
+                throw error
             })
             .finally(() => {
                 setLoading(false)
@@ -42,8 +52,39 @@ function CustomersPage() {
     }, [])
 
     useEffect(() => {
-        void fetchCustomers()
+        void fetchCustomers().catch(() => undefined)
     }, [fetchCustomers])
+
+    const refreshCustomers = useCallback(async () => {
+        await fetchCustomers()
+    }, [fetchCustomers])
+
+    const handleCustomerAdded = async (createdCustomer: Customer) => {
+        const data = await fetchCustomers()
+        const createdCustomerId = createdCustomer._links?.self?.href
+        const rowIndex = data.findIndex((customer) =>
+            createdCustomerId
+                ? customer._links.self.href === createdCustomerId
+                : customer.email === createdCustomer.email &&
+                  customer.phone === createdCustomer.phone,
+        )
+        const customerId =
+            rowIndex >= 0
+                ? data[rowIndex]._links.self.href
+                : createdCustomerId
+
+        if (rowIndex >= 0) {
+            setPaginationModel((current) => ({
+                ...current,
+                page: Math.floor(rowIndex / current.pageSize),
+            }))
+        }
+
+        if (customerId) {
+            setHighlightedCustomerId(customerId)
+            window.setTimeout(() => setHighlightedCustomerId(null), 3000)
+        }
+    }
 
     const columns: GridColDef<Customer>[] = [
         { field: 'firstname', headerName: 'First name', flex: 1 },
@@ -69,12 +110,12 @@ function CustomersPage() {
 
                     <EditCustomerDialog
                         customer={params.row}
-                        onCustomerUpdated={fetchCustomers}
+                        onCustomerUpdated={refreshCustomers}
                     />
 
                     <DeleteCustomerDialog
                         customer={params.row}
-                        onCustomerDeleted={fetchCustomers}
+                        onCustomerDeleted={refreshCustomers}
                     />
                 </>
             ),
@@ -141,7 +182,7 @@ function CustomersPage() {
                             Export CSV
                         </Button>
 
-                        <AddCustomerDialog onCustomerAdded={fetchCustomers} />
+                        <AddCustomerDialog onCustomerAdded={handleCustomerAdded} />
                     </Box>
                 </Stack>
 
@@ -172,14 +213,13 @@ function CustomersPage() {
                     loading={loading}
                     disableRowSelectionOnClick
                     pageSizeOptions={[5, 10, 25]}
-                    initialState={{
-                        pagination: {
-                            paginationModel: {
-                                pageSize: 10,
-                                page: 0,
-                            },
-                        },
-                    }}
+                    paginationModel={paginationModel}
+                    onPaginationModelChange={setPaginationModel}
+                    getRowClassName={(params) =>
+                        params.id === highlightedCustomerId
+                            ? 'newly-added-row'
+                            : ''
+                    }
                     sx={{
                         backgroundColor: '#ffffff',
                         borderColor: '#e2e8f0',
@@ -193,6 +233,13 @@ function CustomersPage() {
                         },
                         '& .MuiDataGrid-row:hover': {
                             backgroundColor: '#f0fdfa',
+                        },
+                        '@keyframes highlightNewRow': {
+                            '0%': { backgroundColor: '#5eead4' },
+                            '100%': { backgroundColor: '#ffffff' },
+                        },
+                        '& .newly-added-row': {
+                            animation: 'highlightNewRow 3s ease-out',
                         },
                     }}
                 />

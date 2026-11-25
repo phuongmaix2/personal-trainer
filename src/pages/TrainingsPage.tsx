@@ -5,7 +5,12 @@ import Box from '@mui/material/Box'
 import Paper from '@mui/material/Paper'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
-import { DataGrid, type GridColDef } from '@mui/x-data-grid'
+import {
+    DataGrid,
+    type GridColDef,
+    type GridPaginationModel,
+} from '@mui/x-data-grid'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { getTrainings } from '../api/trainingApi'
 import type { Training } from '../types'
 import DeleteTrainingDialog from '../components/DeleteTrainingDialog'
@@ -17,16 +22,26 @@ type TrainingRow = Training & {
 
 
 function TrainingsPage() {
+    const location = useLocation()
+    const navigate = useNavigate()
+    const highlightedTrainingId = (
+        location.state as { highlightedTrainingId?: number } | null
+    )?.highlightedTrainingId
     const [trainings, setTrainings] = useState<Training[]>([])
     const [search, setSearch] = useState('')
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
+    const [activeHighlightId, setActiveHighlightId] =
+        useState<number | null>(null)
+    const [paginationModel, setPaginationModel] =
+        useState<GridPaginationModel>({ page: 0, pageSize: 10 })
 
     const fetchTrainings = useCallback(() => {
         return getTrainings()
             .then((data) => {
                 setTrainings(data)
                 setError('')
+                return data
             })
             .catch((error: unknown) => {
                 const message =
@@ -35,6 +50,7 @@ function TrainingsPage() {
                         : 'Failed to fetch trainings'
 
                 setError(message)
+                throw error
             })
             .finally(() => {
                 setLoading(false)
@@ -43,6 +59,31 @@ function TrainingsPage() {
 
     useEffect(() => {
         void fetchTrainings()
+            .then((data) => {
+                if (highlightedTrainingId == null) {
+                    return
+                }
+
+                const rowIndex = data.findIndex(
+                    (training) => training.id === highlightedTrainingId,
+                )
+
+                if (rowIndex >= 0) {
+                    setPaginationModel((current) => ({
+                        ...current,
+                        page: Math.floor(rowIndex / current.pageSize),
+                    }))
+                    setActiveHighlightId(highlightedTrainingId)
+                    window.setTimeout(() => setActiveHighlightId(null), 3000)
+                }
+
+                navigate('/trainings', { replace: true, state: null })
+            })
+            .catch(() => undefined)
+    }, [fetchTrainings, highlightedTrainingId, navigate])
+
+    const refreshTrainings = useCallback(async () => {
+        await fetchTrainings()
     }, [fetchTrainings])
 
     const columns: GridColDef<TrainingRow>[] = [
@@ -79,7 +120,7 @@ function TrainingsPage() {
             renderCell: (params) => (
                 <DeleteTrainingDialog
                     training={params.row}
-                    onTrainingDeleted={fetchTrainings}
+                    onTrainingDeleted={refreshTrainings}
                 />
             ),
         },
@@ -156,14 +197,13 @@ function TrainingsPage() {
                     loading={loading}
                     disableRowSelectionOnClick
                     pageSizeOptions={[5, 10, 25]}
-                    initialState={{
-                        pagination: {
-                            paginationModel: {
-                                pageSize: 10,
-                                page: 0,
-                            },
-                        },
-                    }}
+                    paginationModel={paginationModel}
+                    onPaginationModelChange={setPaginationModel}
+                    getRowClassName={(params) =>
+                        params.id === activeHighlightId
+                            ? 'newly-added-row'
+                            : ''
+                    }
                     sx={{
                         backgroundColor: '#ffffff',
                         borderColor: '#e2e8f0',
@@ -177,6 +217,13 @@ function TrainingsPage() {
                         },
                         '& .MuiDataGrid-row:hover': {
                             backgroundColor: '#f0fdfa',
+                        },
+                        '@keyframes highlightNewRow': {
+                            '0%': { backgroundColor: '#5eead4' },
+                            '100%': { backgroundColor: '#ffffff' },
+                        },
+                        '& .newly-added-row': {
+                            animation: 'highlightNewRow 3s ease-out',
                         },
                     }}
                 />

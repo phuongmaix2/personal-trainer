@@ -28,6 +28,18 @@ export async function addTraining(training: TrainingInput) {
     if (!response.ok) {
         throw new Error('Failed to add training')
     }
+
+    const data = await response.json().catch(() => null) as {
+        id?: number
+        _links?: { self?: { href?: string } }
+    } | null
+    const location = response.headers.get('Location')
+    const resourceUrl = data?._links?.self?.href ?? location
+    const idFromUrl = resourceUrl
+        ? Number(resourceUrl.split('/').at(-1))
+        : null
+
+    return data?.id ?? (Number.isFinite(idFromUrl) ? idFromUrl : null)
 }
 
 export async function deleteTraining(id: number) {
